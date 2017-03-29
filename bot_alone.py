@@ -3,6 +3,26 @@ import telebot
 import config
 import random
 import shelve
+import flask
+from time import sleep
+
+app = flask.Flask(__name__)
+
+# Empty webserver index, return nothing, just http 200
+@app.route('/', methods=['GET', 'HEAD'])
+def index():
+    return ''
+
+# Process webhook calls
+@app.route(config.WEBHOOK_URL_PATH, methods=['POST'])
+def webhook():
+    if flask.request.headers.get('content-type') == 'application/json':
+        json_string = flask.request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+        return ''
+    else:
+        flask.abort(403)
 
 bot = telebot.TeleBot(config.token)
 
@@ -171,4 +191,18 @@ def repeat_all_messages(message):
     else:
         bot.send_message(chat_id, 'Оо, %s \n%s' %(chat.user.name, random.choice(phrases)))
 
+
+# Remove webhook, it fails sometimes the set if there is a previous webhook
+bot.remove_webhook()
+sleep(5)
+
+# Set webhook
+bot.set_webhook(url=config.WEBHOOK_URL_BASE+config.WEBHOOK_URL_PATH,
+                certificate=open(config.WEBHOOK_SSL_CERT, 'r'))
+
+# Start flask server
+app.run(host=config.WEBHOOK_LISTEN,
+        port=config.WEBHOOK_PORT,
+        ssl_context=(config.WEBHOOK_SSL_CERT, config.WEBHOOK_SSL_PRIV),
+        debug=True)
 
