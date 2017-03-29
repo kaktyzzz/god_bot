@@ -1,4 +1,6 @@
-token = '322979405:AAFV6DsxbxK5obMxVfk5skYVD8QQQNPkwwU'
+TOKEN = '322979405:AAFV6DsxbxK5obMxVfk5skYVD8QQQNPkwwU'
+
+DB_NAME = 'chat'
 
 WEBHOOK_HOST = '89.223.31.83'
 WEBHOOK_PORT = 443  # 443, 80, 88 or 8443 (port need to be 'open')
@@ -16,4 +18,4 @@ WEBHOOK_SSL_PRIV = 'cert/webhook_pkey.pem'  # Path to the ssl private key
 # with the same value in you put in WEBHOOK_HOST
 
 WEBHOOK_URL_BASE = "https://%s:%s" % (WEBHOOK_HOST, WEBHOOK_PORT)
-WEBHOOK_URL_PATH = "/%s/" % (token)
+WEBHOOK_URL_PATH = "/%s/" % (TOKEN)

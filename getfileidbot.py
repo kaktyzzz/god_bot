@@ -5,7 +5,7 @@ import os
 import time
 import logging
 
-bot = telebot.TeleBot(config.token)
+bot = telebot.TeleBot(config.TOKEN)
 logger = telebot.logger
 telebot.logger.setLevel(logging.DEBUG) # Outputs debug messages to console.
 

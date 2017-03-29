@@ -24,7 +24,7 @@ def webhook():
     else:
         flask.abort(403)
 
-bot = telebot.TeleBot(config.token)
+bot = telebot.TeleBot(config.TOKEN)
 
 db_name = 'chat'
 chat_dict = {}
