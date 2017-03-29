@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import telebot
+from telebot import types
 import config
 import random
 import shelve
@@ -9,42 +10,77 @@ bot = telebot.TeleBot(config.token)
 db_name = 'chat'
 chat_dict = {}
 
+
 class User:
     def __init__(self, name):
         self.name = name
         self.god = None
+
 
 class Chat:
     def __init__(self):
         self.user = None
         self.in_process = True
 
+    @staticmethod
+    def get_from_db(chat_id):
+        db = shelve.open(db_name)
+        chat = db.get(str(chat_id), default=None)
+        db.close()
+
+        return chat
+
+    @staticmethod
+    def save_to_db(chat_id):
+        db = shelve.open(db_name)
+        db[str(chat_id)] = chat_dict[chat_id]
+        db.close()
+
+
+class Religious:
+    def __init__(self, name, hello_phrase=['Да прибудет с тобой сила'], stickers=[], prayers={}):
+        self.name = name
+        self.hello_phrases = hello_phrase
+        self.stickers = stickers
+        self.prayers = prayers
+
+
+hrist = Religious(
+                'Христианство',
+                ['Господу Богу твоему поклоняйся и Ему одному служи', 'Люби Бога своего и всех людей'],
+                ['CAADAgADOAADGXMNCSqaRY-FOG6VAg'],
+                {
+                    'Отче наш':'AwADAgADVwADW5rZSvekof0PkgZBAg',
+                    'Песнь Богородицы': 'AwADAgADVQADW5rZSjicBmlpyILRAg',
+                    'Символ веры': 'AwADAgADWAADW5rZSj2pan7ZxRsmAg',
+                    'Молитва кресту': 'AwADAgADVgADW5rZSryvl4hANtGxAg',
+                })
+
+buddizm = Religious(
+                'Буддизм',
+                ['Гармония приходит изнутри. Не ищите ее снаружи'],
+                ['CAADAwADfAADyzaRAAFVPCGbs0CdwAI'])
+
 gods = {
-    'иисус': 'Господу Богу твоему поклоняйся и Ему одному служи',
-    'иисус христос': 'Люби Бога своего и всех людей',
-    'аллах': 'Нет никакого божества, кроме Аллаха, и Мухаммад — посланник Аллаха!',
-    'будда': 'Гармония приходит изнутри. Не ищите ее снаружи',
-    'будда шакьямуни': 'Кувшин наполняется постепенно, капля за каплей',
-    'яхва': 'Да прибудет с тобой сила',
-    'бог яхва': 'Да прибудет с тобой сила',
-    'конфуций': 'Да прибудет с тобой сила',
-    'аматэрасу': 'Да прибудет с тобой сила',
-    'заратустра': 'Да прибудет с тобой сила',
-    'ахурамазда': 'Да прибудет с тобой сила',
-    'ариман': 'Да прибудет с тобой сила',
-    'путин': 'Я слежу за тобой, мой друг'
+    'иисус': hrist,
+    'иисус христос': hrist,
+    'аллах': Religious(
+                'Ислам',
+                ['Нет никакого божества, кроме Аллаха, и Мухаммад — посланник Аллаха!'],
+                 ['CAADBQADogAD_uTOAi1OxoF_OJCSAg']),
+    'будда': buddizm,
+    'будда шакьямуни': buddizm,
+    'яхва': Religious(''),
+    'бог яхва': Religious(''),
+    'конфуций': Religious(''),
+    'аматэрасу': Religious(''),
+    'заратустра': Religious(''),
+    'ахурамазда': Religious(''),
+    'ариман': Religious(''),
+    'путин': Religious(
+                'Путин',
+                ['Я слежу за тобой, мой друг'])
 }
-
-
-stickers = {
-    'иисус': ['CAADAgADOAADGXMNCSqaRY-FOG6VAg'],
-    'иисус христос': ['CAADAgADOAADGXMNCSqaRY-FOG6VAg'],
-    'аллах': ['CAADBQADogAD_uTOAi1OxoF_OJCSAg'],
-    'будда': ['CAADAwADfAADyzaRAAFVPCGbs0CdwAI'],
-    'будда шакьямуни': ['CAADAwADfAADyzaRAAFVPCGbs0CdwAI'],
-}
-
-
 
 phrases = [
     'Да прибудет с тобой сила!',
@@ -52,12 +88,17 @@ phrases = [
     'Если твоей душе это будет угодно, ты обязательно это обретешь'
 ]
 
+plz_registrate = 'Пожалуйста, установите контакт с Богом'
+cancel = 'Отмена'
+
 help_message = """\
 Вы можете просто общаться с Богом на любые темы, задавать вопросы, что-то просить или воспользоваться следующими командами:
 
-/start - Заново установить связь с Богом
+/start - Заново установить контакт с Богом
 
-/pray - Помолиться
+/prayerbook - Молитвенник
+
+/pray - Помолиться за раба Божьего
 
 /offertory - Сделать пожертвование
 /help - Помощь
@@ -68,17 +109,60 @@ help_message = """\
 def send_help(message):
     chat_id = message.chat.id
 
-    if chat_id in chat_dict and chat_dict[chat_id].in_process == True:
+    if chat_id in chat_dict and chat_dict[chat_id].in_process is True:
         return
 
     msg = bot.send_message(chat_id, help_message)
 
-
-@bot.message_handler(commands=['pray'])
-def send_help(message):
+@bot.message_handler(commands=['prayerbook'])
+def send_prayerbook(message):
     chat_id = message.chat.id
 
-    if chat_id in chat_dict and chat_dict[chat_id].in_process == True:
+    if chat_id in chat_dict and chat_dict[chat_id].in_process is True:
+        return
+
+    chat = Chat.get_from_db(chat_id)
+    if chat is None:
+        msg = bot.send_message(chat_id, plz_registrate)
+    else:
+        markup = types.ReplyKeyboardMarkup()
+        for prayer_name in gods[chat.user.god].prayers.keys():
+            markup.row(prayer_name)
+        markup.row(cancel)
+
+        msg = bot.send_message(chat_id, """\
+            Выберите молитву
+        """, reply_markup=markup)
+        bot.register_next_step_handler(msg, process_prayer_step)
+        chat.in_process = True
+        chat_dict[chat_id] = chat
+
+
+def process_prayer_step(message):
+    chat_id = message.chat.id
+
+    prayer_name = message.text.encode('utf-8')
+    if prayer_name == cancel:
+        keyboard_hider = types.ReplyKeyboardRemove()
+        bot.send_message(chat_id, random.choice(phrases), reply_markup=keyboard_hider)
+        chat_dict.pop(chat_id)
+    else:
+        prayers = gods[chat_dict[chat_id].user.god].prayers
+        if prayer_name in prayers:
+            msg = bot.send_voice(chat_id, prayers[prayer_name])
+        else:
+            msg = bot.send_message(chat_id, 'Я не знаю такой молитвы')
+        bot.register_next_step_handler(msg, process_prayer_step)
+
+
+
+
+
+@bot.message_handler(commands=['pray'])
+def send_pray(message):
+    chat_id = message.chat.id
+
+    if chat_id in chat_dict and chat_dict[chat_id].in_process is True:
         return
 
     msg = bot.send_message(chat_id, """\
@@ -87,10 +171,10 @@ def send_help(message):
 
 
 @bot.message_handler(commands=['offertory'])
-def send_help(message):
+def send_offertory(message):
     chat_id = message.chat.id
 
-    if chat_id in chat_dict and chat_dict[chat_id].in_process == True:
+    if chat_id in chat_dict and chat_dict[chat_id].in_process is True:
         return
 
     msg = bot.send_message(chat_id, """\
@@ -102,7 +186,7 @@ def send_help(message):
 def send_welcome(message):
     chat_id = message.chat.id
 
-    if chat_id in chat_dict and chat_dict[chat_id].in_process == True:
+    if chat_id in chat_dict and chat_dict[chat_id].in_process is True:
         return
 
     msg = bot.send_message(chat_id, """\
@@ -133,17 +217,15 @@ def process_god_name(message):
         if chat_id in chat_dict:
             user = chat_dict[chat_id].user
         if god_name in gods:
-            if god_name in stickers:
-                bot.send_sticker(chat_id, stickers[god_name][0])
-            bot.send_message(chat_id, gods[god_name] + '\n\n' + help_message)
-
+            relig = gods[god_name]
+            if relig.stickers:
+                bot.send_sticker(chat_id, random.choice(relig.stickers))
+            bot.send_message(chat_id, random.choice(relig.hello_phrases) + '\n\n' + help_message)
 
             user.god = god_name
             user.in_process = False
 
-            db = shelve.open(db_name)
-            db[str(chat_id)] = chat_dict[chat_id]
-            db.close()
+            Chat.save_to_db(chat_id)
 
             chat_dict.pop(chat_id, None)
         else:
@@ -159,16 +241,14 @@ def repeat_all_messages(message):
 
     print str(chat_id) + ': ' + message.text
 
-    if chat_id in chat_dict and chat_dict[chat_id].in_process == True:
+    if chat_id in chat_dict and chat_dict[chat_id].in_process is True:
         return
 
-    db = shelve.open(db_name)
-    chat = db.get(str(chat_id), default=None)
-    db.close()
+    chat = Chat.get_from_db(chat_id)
 
     if chat is None:
         bot.send_message(chat_id, random.choice(phrases))
     else:
-        bot.send_message(chat_id, 'Оо, %s \n%s' %(chat.user.name, random.choice(phrases)))
+        bot.send_message(chat_id, 'Оо, %s \n%s' % (chat.user.name, random.choice(phrases)))
 
 
