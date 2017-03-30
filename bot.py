@@ -35,7 +35,7 @@ def send_prayerbook(message):
         markup.row(st.cancel)
 
         msg = bot.send_message(chat_id, """\
-            Выберите молитву
+            О чем Ты хочешь помолиться?
         """, reply_markup=markup)
         bot.register_next_step_handler(msg, process_prayer_step)
         chat.in_process = True
@@ -59,9 +59,6 @@ def process_prayer_step(message):
         bot.register_next_step_handler(msg, process_prayer_step)
 
 
-
-
-
 @bot.message_handler(commands=['pray'])
 def send_pray(message):
     chat_id = message.chat.id
@@ -81,9 +78,11 @@ def send_offertory(message):
     if chat_id in chat_dict and chat_dict[chat_id].in_process is True:
         return
 
-    msg = bot.send_message(chat_id, """\
-        offertory
-    """)
+    keyboard = types.InlineKeyboardMarkup()
+    url_button = types.InlineKeyboardButton(text="Сделать пожертвование", url="http://yasobe.ru/na/vnezemnoeblago")
+    keyboard.add(url_button)    
+
+    msg = bot.send_message(chat_id, st.offertory_message, reply_markup=keyboard)
 
 
 @bot.message_handler(commands=['start'])

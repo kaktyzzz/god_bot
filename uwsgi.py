@@ -24,7 +24,7 @@ def webhook():
 
 # Remove webhook, it fails sometimes the set if there is a previous webhook
 bot.bot.remove_webhook()
-sleep(5)
+sleep(2)
 
 # Set webhook
 bot.bot.set_webhook(url=config.WEBHOOK_URL_BASE+config.WEBHOOK_URL_PATH,
