@@ -38,7 +38,6 @@ def send_prayerbook(message):
             О чем Ты хочешь помолиться?
         """, reply_markup=markup)
         bot.register_next_step_handler(msg, process_prayer_step)
-        chat.in_process = True
         chat_dict[chat_id] = chat
 
 
@@ -71,29 +70,39 @@ def send_pray(message):
         msg = bot.send_message(chat_id, st.plz_registrate)
     else:
         msg = bot.send_message(chat_id, """\
-            Отправь контакт того, к кому обращена Твоя молитва (и ему придет оповещение) или назови его имя
+            Отправь псевдоним в формате: @username того, к кому обращена Твоя молитва (и ему придет оповещение) или назови его имя
         """)
         bot.register_next_step_handler(msg, process_pray_for)
-        chat.in_process = True
         chat_dict[chat_id] = chat
 
 
 def process_pray_for(message):
     chat_id = message.chat.id
-    print message
 
-    # prayer_name = message.text.encode('utf-8')
-    # if prayer_name == st.cancel:
-    #     keyboard_hider = types.ReplyKeyboardRemove()
-    #     bot.send_message(chat_id, random.choice(st.phrases), reply_markup=keyboard_hider)
-    #     chat_dict.pop(chat_id)
-    # else:
-    #     prayers = st.gods[chat_dict[chat_id].user.god].prayers
-    #     if prayer_name in prayers:
-    #         msg = bot.send_voice(chat_id, prayers[prayer_name])
-    #     else:
-    #         msg = bot.send_message(chat_id, 'Я не знаю такой молитвы')
-    #     bot.register_next_step_handler(msg, process_prayer_step)
+    chat_dict[chat_id].temp_message = message.text.encode('utf-8')
+
+    msg = bot.send_message(chat_id, 'Запишите для него молитву в текстовой или голосовой форме')
+    bot.register_next_step_handler(msg, process_pray_text)
+
+
+def process_pray_text(message):
+    chat = message.chat
+    chat_id = chat.id
+
+    prev_message = chat_dict[chat_id].temp_message
+    if prev_message[0] == '@':
+        try:
+            bot.send_message(prev_message[0], st.pray_for_you % (chat.fist_name + ' ' + chat.last_name))
+            print ('Отправлено уведомление ' + prev_message)
+        except Exception as e:
+            bot.send_message(chat_id, st.prayer_not_listened)
+            print ('Ошибка отправления уведомления ' + e)
+        else:
+            bot.send_message(chat_id, st.prayer_listened)
+    else:
+        bot.send_message(chat_id, st.prayer_listened)
+
+    chat_dict[chat_id].pop()
 
 
 @bot.message_handler(commands=['offertory'])
@@ -151,7 +160,6 @@ def process_god_name(message):
             bot.send_message(chat_id, random.choice(relig.hello_phrases) + '\n\n' + st.help_message)
 
             user.god = god_name
-            user.in_process = False
 
             Chat.save_to_db(chat_id)
 

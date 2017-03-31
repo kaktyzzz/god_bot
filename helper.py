@@ -26,21 +26,22 @@ class ShelveDB:
 
 
 class Chat:
-    def __init__(self):
-        self.user = None
+    def __init__(self, user=None):
+        self.user = user
         self.in_process = True
+        self.temp_message = ''
 
     @staticmethod
     def get_from_db(chat_id):
         with ShelveDB(config.DB_NAME) as db:
-            chat = db.get(str(chat_id), default=None)
+            chat = Chat(db.get(str(chat_id), default=None))
 
         return chat
 
     @staticmethod
     def save_to_db(chat_id):
         with ShelveDB(config.DB_NAME) as db:
-            db[str(chat_id)] = chat_dict[chat_id]
+            db[str(chat_id)] = chat_dict[chat_id].user
 
 
 class Prayer:
