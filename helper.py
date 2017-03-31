@@ -43,6 +43,14 @@ class Chat:
             db[str(chat_id)] = chat_dict[chat_id]
 
 
+class Prayer:
+    def __init__(self, audio_file_id=None, text='', for_human=False):
+        self.audio_file_id = audio_file_id
+        self.text = text
+        self.for_human = for_human
+
+
+
 class Religious:
     def __init__(self, name, hello_phrase=['Да прибудет с тобой сила'], stickers=[], prayers={}):
         self.name = name

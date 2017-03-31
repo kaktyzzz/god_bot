@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from helper import Religious
+from helper import Religious, Prayer
 
 hrist = Religious(
                 'Христианство',
                 ['Господу Богу твоему поклоняйся и Ему одному служи', 'Люби Бога своего и всех людей'],
                 ['CAADAgADOAADGXMNCSqaRY-FOG6VAg'],
                 {
-                    'Отче наш':'AwADAgADVwADW5rZSvekof0PkgZBAg',
-                    'Песнь Богородицы': 'AwADAgADVQADW5rZSjicBmlpyILRAg',
-                    'Символ веры': 'AwADAgADWAADW5rZSj2pan7ZxRsmAg',
-                    'Молитва кресту': 'AwADAgADVgADW5rZSryvl4hANtGxAg',
+                    'Отче наш': Prayer('AwADAgADVwADW5rZSvekof0PkgZBAg') ,
+                    'Песнь Богородицы': Prayer('AwADAgADVQADW5rZSjicBmlpyILRAg'),
+                    'Символ веры': Prayer('AwADAgADWAADW5rZSj2pan7ZxRsmAg'),
+                    'Молитва кресту': Prayer('AwADAgADVgADW5rZSryvl4hANtGxAg'),
                 })
 
 buddizm = Religious(
@@ -35,7 +35,7 @@ gods = {
     'ахурамазда': Religious(''),
     'ариман': Religious(''),
     'путин': Religious(
-                'Путин',
+                'Путианство',
                 ['Я слежу за тобой, мой друг'])
 }
 

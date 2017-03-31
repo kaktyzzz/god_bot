@@ -66,9 +66,34 @@ def send_pray(message):
     if chat_id in chat_dict and chat_dict[chat_id].in_process is True:
         return
 
-    msg = bot.send_message(chat_id, """\
-        pray
-    """)
+    chat = Chat.get_from_db(chat_id)
+    if chat is None:
+        msg = bot.send_message(chat_id, st.plz_registrate)
+    else:
+        msg = bot.send_message(chat_id, """\
+            Отправь контакт того, к кому обращена Твоя молитва (и ему придет оповещение) или назови его имя
+        """)
+        bot.register_next_step_handler(msg, process_pray_for)
+        chat.in_process = True
+        chat_dict[chat_id] = chat
+
+
+def process_pray_for(message):
+    chat_id = message.chat.id
+    print message
+
+    # prayer_name = message.text.encode('utf-8')
+    # if prayer_name == st.cancel:
+    #     keyboard_hider = types.ReplyKeyboardRemove()
+    #     bot.send_message(chat_id, random.choice(st.phrases), reply_markup=keyboard_hider)
+    #     chat_dict.pop(chat_id)
+    # else:
+    #     prayers = st.gods[chat_dict[chat_id].user.god].prayers
+    #     if prayer_name in prayers:
+    #         msg = bot.send_voice(chat_id, prayers[prayer_name])
+    #     else:
+    #         msg = bot.send_message(chat_id, 'Я не знаю такой молитвы')
+    #     bot.register_next_step_handler(msg, process_prayer_step)
 
 
 @bot.message_handler(commands=['offertory'])
