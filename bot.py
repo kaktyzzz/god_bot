@@ -102,7 +102,7 @@ def process_pray_text(message):
     else:
         bot.send_message(chat_id, st.prayer_listened)
 
-    chat_dict[chat_id].pop()
+    chat_dict.pop(chat_id)
 
 
 @bot.message_handler(commands=['offertory'])
