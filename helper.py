@@ -33,15 +33,23 @@ class Chat:
 
     @staticmethod
     def get_from_db(chat_id):
-        with ShelveDB(config.DB_NAME) as db:
-            chat = Chat(db.get(str(chat_id), default=None))
+        with ShelveDB(config.DB_CHAT_NAME) as db:
+            user = db.get(str(chat_id), default=None)
 
-        return chat
+        if user is None:
+            return None
+        else:
+            return Chat(user)
 
     @staticmethod
     def save_to_db(chat_id):
-        with ShelveDB(config.DB_NAME) as db:
+        with ShelveDB(config.DB_CHAT_NAME) as db:
             db[str(chat_id)] = chat_dict[chat_id].user
+
+
+def save_contact(contact):
+    with ShelveDB(config.DB_INVITE_NAME)as db:
+        db[str(contact.user_id)] = contact
 
 
 class Prayer:

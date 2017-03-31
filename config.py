@@ -1,6 +1,8 @@
 TOKEN = '322979405:AAFV6DsxbxK5obMxVfk5skYVD8QQQNPkwwU'
 
-DB_NAME = 'chat'
+DB_CHAT_NAME = 'chat'
+DB_INVITE_NAME = 'invite'
+
 
 WEBHOOK_HOST = '89.223.31.83'
 WEBHOOK_PORT = 443  # 443, 80, 88 or 8443 (port need to be 'open')

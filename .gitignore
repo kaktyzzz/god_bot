@@ -1,4 +1,5 @@
 *.pyc
 /cert/*
 /chat*
+/invite*
 *.mp3

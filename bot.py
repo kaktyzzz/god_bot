@@ -70,7 +70,7 @@ def send_pray(message):
         msg = bot.send_message(chat_id, st.plz_registrate)
     else:
         msg = bot.send_message(chat_id, """\
-            Отправь псевдоним в формате: @username того, к кому обращена Твоя молитва (и ему придет оповещение) или назови его имя
+            Отправь контакт близкого человека, к которому обращена Твоя молитва (и ему придет оповещение) или назови его имя
         """)
         bot.register_next_step_handler(msg, process_pray_for)
         chat_dict[chat_id] = chat
@@ -79,7 +79,7 @@ def send_pray(message):
 def process_pray_for(message):
     chat_id = message.chat.id
 
-    chat_dict[chat_id].temp_message = message.text.encode('utf-8')
+    chat_dict[chat_id].temp_message = message
 
     msg = bot.send_message(chat_id, 'Запишите для него молитву в текстовой или голосовой форме')
     bot.register_next_step_handler(msg, process_pray_text)
@@ -90,17 +90,13 @@ def process_pray_text(message):
     chat_id = chat.id
 
     prev_message = chat_dict[chat_id].temp_message
-    if prev_message[0] == '@':
-        try:
-            bot.send_message(prev_message[0], st.pray_for_you % (chat.fist_name + ' ' + chat.last_name))
-            print ('Отправлено уведомление ' + prev_message)
-        except Exception as e:
-            bot.send_message(chat_id, st.prayer_not_listened)
-            print ('Ошибка отправления уведомления ' + e)
-        else:
-            bot.send_message(chat_id, st.prayer_listened)
+    if prev_message.contact is not None:
+        save_contact(prev_message.contact)
+        #send notification to him
+        name = prev_message.contact.first_name.encode("UTF-8") + ' ' + prev_message.contact.last_name.encode("UTF-8")
     else:
-        bot.send_message(chat_id, st.prayer_listened)
+        name = prev_message.text.encode("UTF-8")
+    bot.send_message(chat_id, random.choice(st.prayer_listened % name, st.prayer_not_listened))
 
     chat_dict.pop(chat_id)
 
