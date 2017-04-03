@@ -52,7 +52,7 @@ def process_prayer_step(message):
     else:
         prayers = st.gods[chat_dict[chat_id].user.god].prayers
         if prayer_name in prayers:
-            msg = bot.send_voice(chat_id, prayers[prayer_name])
+            msg = bot.send_voice(chat_id, prayers[prayer_name].audio_file_id)
         else:
             msg = bot.send_message(chat_id, 'Я не знаю такой молитвы')
         bot.register_next_step_handler(msg, process_prayer_step)
