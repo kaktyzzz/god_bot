@@ -96,7 +96,7 @@ def process_pray_text(message):
         name = prev_message.contact.first_name.encode("UTF-8") + ' ' + prev_message.contact.last_name.encode("UTF-8")
     else:
         name = prev_message.text.encode("UTF-8")
-    bot.send_message(chat_id, random.choice(st.prayer_listened % name, st.prayer_not_listened))
+    bot.send_message(chat_id, random.choice([st.prayer_listened % name, st.prayer_not_listened]))
 
     chat_dict.pop(chat_id)
 
